@@ -109,4 +109,16 @@ public class DefaultEventManagerTest
         {
         }
     }
+    
+    /**
+     * Attempting to publish a subevent   
+     */
+    @Test
+    public void testListenerWithSubEventClass()
+    {
+        EventListenerMock eventListenerMock = new EventListenerMock(new Class[]{SimpleEvent.class});
+        eventManager.registerListener("some.key", eventListenerMock);
+        eventManager.publishEvent(new SubEvent(this));
+        assertFalse(eventListenerMock.isCalled());
+    }
 }
