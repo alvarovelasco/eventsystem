@@ -1,11 +1,19 @@
 package com.strands.interviews.eventsystem;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.Test;
+
+import com.strands.interviews.eventsystem.events.CreationEvent;
 import com.strands.interviews.eventsystem.events.SimpleEvent;
 import com.strands.interviews.eventsystem.events.SubEvent;
 import com.strands.interviews.eventsystem.impl.DefaultEventManager;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class DefaultEventManagerTest
 {
@@ -120,5 +128,23 @@ public class DefaultEventManagerTest
         eventManager.registerListener("some.key", eventListenerMock);
         eventManager.publishEvent(new SubEvent(this));
         assertFalse(eventListenerMock.isCalled());
+    }
+    
+    /**
+     * Check that the feature about all-typed events listener is working
+     */
+    @Test
+    public void testListeningMultipleEventTypes()
+    {
+    	 EventListenerMock emptyClassEventListenerMock = new EventListenerMock(new Class[]{});
+         eventManager.registerListener("some.key", emptyClassEventListenerMock);
+         List<SimpleEvent> multipleEvents = Arrays.asList(
+        		 new SimpleEvent(this),new CreationEvent(this),new SubEvent(this));
+         for (SimpleEvent event : multipleEvents) {
+        	 eventManager.publishEvent(event);
+         }
+        
+         assertTrue(emptyClassEventListenerMock.isCalled());
+         assertEquals(multipleEvents.size(), emptyClassEventListenerMock.count);
     }
 }
