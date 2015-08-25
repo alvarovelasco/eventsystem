@@ -33,18 +33,31 @@ public class DefaultEventManager implements EventManager
     private Collection calculateListeners(Class eventClass)
     {
     	final Collection listeners = new ArrayList();
-    	
-    	//Check if the eventclass exists in the map,
-    	//therefore we prevent NPE from addAll
-    	if (listenersByClass.containsKey(eventClass)) {
-    		listeners.addAll((Collection) listenersByClass.get(eventClass));
+
+    	// Get up to the top of Object, 
+    	// in order to retrieve all class parents and find them on the map
+    	boolean seekUp = true;
+    	while (seekUp) {
+        	//Check if the eventclass exists in the map,
+        	//therefore we prevent NPE from addAll
+    		if (listenersByClass.containsKey(eventClass)) {
+	    		listeners.addAll((Collection) listenersByClass.get(eventClass));
+	    	}
+    		// If the current class implements InterviewEvent, we have reached the end. 
+	    	if (Arrays.asList(eventClass.getInterfaces()).contains(InterviewEvent.class) ){
+	    		seekUp = false;
+	    	}
+	    	eventClass = eventClass.getSuperclass();
     	}
+
         if (listenersByClass.containsKey(null)) {
         	listeners.addAll((Collection)listenersByClass.get(null));
         }
         
         return listeners;
     }
+    
+    
 
     public void registerListener(String listenerKey, InterviewEventListener listener)
     {
@@ -59,7 +72,7 @@ public class DefaultEventManager implements EventManager
 
         Class[] classes = listener.getHandledEventClasses();
 
-        //TODO This implemented according to specifications (f it returns an empty array).
+        //TODO This implemented according to specifications (if it returns an empty array).
         // There should be some protection against null array instance in order to prevent NPE
         if (classes.length == 0) {
         	addToListenerList(null, listener);
